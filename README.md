@@ -13,6 +13,12 @@ cd express-app-template
 npm install
 ```
 
+If you want to run your web app as shell script you can add to it execute rights:
+
+```sh
+chmod u+x app.js
+```
+
 
 ### Configuration
 
