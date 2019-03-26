@@ -152,4 +152,36 @@ class handler extends RequestHandler
 module.exports = new handler();
 ```
 
-#### Application configuration
+#### Access rules configuration (/config/access.json)
+
+This configuration file defines access rules for your routes and it might look like this:
+
+```json
+{
+  "public": [
+    "/",
+    "/login",
+    "/echo",
+    "/privacy-policy",
+    "/terms",
+    "/public/message",
+    "/public/plufinder/browse",
+    {
+      "rule": "\/public\/plu\/([^\/]+)"
+    },
+    {
+      "rule": "\/public\/plufinder\/plu\/([^\/]+)"
+    },
+    {
+      "rule": "\/public\/plufinder\/varieties\/([^\/]+)"
+    },
+    {
+      "rule": "\/public\/ppi\/([^\/]+)"
+    }
+  ]
+}
+```
+
+Basically, anything that defined within _public_ array node will be served without authentication, otherwise user will receive redirect to _/login_ route.
+
+This array item can be a string or an object that has _rule_ property in it that represents regex rule.
