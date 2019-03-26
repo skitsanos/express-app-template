@@ -313,8 +313,8 @@ const app = {
         //Forms and Uploads parsing
         if (app.config.parsers.forms)
         {
-            app.express.set('uploadDir', __dirname + app.config.uploadsStorage);
-            app.express.set('uploadMaxFileSize', app.config.uploadLimit);
+            app.express.set('uploadDir', __dirname + app.config.uploads.storage);
+            app.express.set('uploadMaxFileSize', app.config.uploads.limit);
 
             app.express.formidable = require('formidable');
         }
@@ -337,10 +337,10 @@ const app = {
         }
 
         //Mount SiteAdmin CMS support
-        if (app.config.cmsEnabled)
+        if (app.config.cms.enabled)
         {
             const SiteAdminCMS = require('./siteadmincms');
-            const cms = new SiteAdminCMS(app.express, app.config.cmsMountPath);
+            const cms = new SiteAdminCMS(app.express, app.config.cms.mountPath);
         }
 
         app.installHandlers();
@@ -373,3 +373,5 @@ const app = {
 global.app = app;
 
 app.init();
+
+//https://stackoverflow.com/questions/16784129/dynamically-load-routes-with-express-js
