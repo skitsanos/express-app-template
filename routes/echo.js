@@ -1,4 +1,5 @@
 const RequestHandler = require('./_request_handler');
+const path = require('path');
 
 class handler extends RequestHandler
 {
@@ -11,7 +12,7 @@ class handler extends RequestHandler
     {
         super.all(req, res, next).then(result =>
         {
-            const manifest = require(global.appRoot + '/package');
+            const manifest = require(path.join(global.app.appRoot, '/package'));
 
             const doc = {
                 meta: {
