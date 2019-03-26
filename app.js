@@ -124,7 +124,7 @@ const app = {
                         {
                             log.info(`loading handler for ${item.path} ${item.method !== undefined ? '(' + item.method.toUpperCase() + ')' : ''}`);
 
-                            app.express[item.method](item.path, require(jsFile)[item.method]);
+                            app.express[item.method](item.path, require(jsFile)[item.method.toLowerCase()]);
                             //app.express.route(item.path)[item.method](require(jsFile)[item.method]);
                         }
                         else
