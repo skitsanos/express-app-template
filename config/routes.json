@@ -1,0 +1,29 @@
+{
+  "routes": [
+    {
+      "path": "/",
+      "handler": "index"
+    },
+    {
+      "path": [
+        "/echo",
+        "/talkback"
+      ],
+      "handler": "echo",
+      "method": "all"
+    },
+    {
+      "path": "/echo/:id",
+      "handler": "echo"
+    },
+    {
+      "path": "/upload",
+      "handler": "upload",
+      "method": "post"
+    },
+    {
+      "path": "/version",
+      "handler": "version"
+    }
+  ]
+}
