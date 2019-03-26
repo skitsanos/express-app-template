@@ -1,0 +1,21 @@
+{
+  "public": [
+    "/",
+    "/login",
+    "/echo",
+    "/privacy-policy",
+    "/terms",
+    {
+      "rule": "\/public\/plu\/([^\/]+)"
+    },
+    {
+      "rule": "\/public\/plufinder\/plu\/([^\/]+)"
+    },
+    {
+      "rule": "\/public\/plufinder\/varieties\/([^\/]+)"
+    },
+    {
+      "rule": "\/public\/ppi\/([^\/]+)"
+    }
+  ]
+}
