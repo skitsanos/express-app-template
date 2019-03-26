@@ -26,11 +26,10 @@ class handler extends RequestHandler
                 //body: req.body
             };
 
-            res.contentType('application/json');
-            res.send(JSON.stringify(doc));
+            res.json(doc);
         }).catch(err =>
         {
-            res.send({error: {message: 'Failed to process request', reason: err}});
+            res.json({error: {message: 'Failed to process request', reason: err}});
         });
     }
 }
