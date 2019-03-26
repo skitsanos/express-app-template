@@ -10,10 +10,14 @@
     "forms": true,
     "cookies": true
   },
+  "uploads": {
+    "storage": "/uploads/",
+    "limit": 10485760
+  },
+  "cms": {
+    "enabled": true,
+    "mountPath": "/cms"
+  },
   "strictRouting": false,
-  "uploadsStorage": "/uploads/",
-  "uploadLimit": 10485760,
-  "viewEngine": "hbs",
-  "cmsEnabled": true,
-  "cmsMountPath": "/cms"
+  "viewEngine": "hbs"
 }
