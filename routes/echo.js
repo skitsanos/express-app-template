@@ -1,38 +1,33 @@
-const RequestHandler = require('./_request_handler');
 const path = require('path');
+const RequestHandler = require(path.join(process.cwd(), 'njsf/express/route'));
 
 class handler extends RequestHandler
 {
-    constructor()
+    constructor(express_instance, log)
     {
-        super();
+        super(express_instance, log);
+        this.path = ['/echo', '/talkback'];
     }
 
     all(req, res, next)
     {
-        super.all(req, res, next).then(result =>
-        {
-            const manifest = require(path.join(global.app.appRoot, '/package'));
+        const manifest = require(path.join(global.app.appRoot, '/package'));
 
-            const doc = {
-                meta: {
-                    name: manifest.name,
-                    description: manifest.description,
-                    version: manifest.version
-                },
-                request: req.headers,
-                query: req.query,
-                params: req.params,
-                file: req.file,
-                //body: req.body
-            };
+        const doc = {
+            meta: {
+                name: manifest.name,
+                description: manifest.description,
+                version: manifest.version
+            },
+            request: req.headers,
+            query: req.query,
+            params: req.params,
+            file: req.file
+            //body: req.body
+        };
 
-            res.json(doc);
-        }).catch(err =>
-        {
-            res.json({error: {message: 'Failed to process request', reason: err}});
-        });
+        res.json(doc);
     }
 }
 
-module.exports = new handler();
+module.exports = handler;

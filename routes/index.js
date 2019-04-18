@@ -1,22 +1,19 @@
-const RequestHandler = require('./_request_handler');
+const path = require('path');
+const RequestHandler = require(path.join(process.cwd(), 'njsf/express/route'));
 
 class handler extends RequestHandler
 {
-    constructor()
+    constructor(express_instance, log)
     {
-        super();
+        super(express_instance, log);
+        this.path = '/';
+        this.description = 'Site index page';
     }
 
     get(req, res, next)
     {
-        super.all(req, res, next).then(result =>
-        {
-            global.app.utils.render(req, res, 'index');
-        }).catch(err =>
-        {
-            res.send({error: {message: 'Failed to process request', reason: err, url: req.url}});
-        });
+        global.app.utils.render(req, res, 'index');
     }
 }
 
-module.exports = new handler();
+module.exports = handler;

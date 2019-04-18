@@ -86,15 +86,26 @@ const app = {
     },
 
     utils: {
+        parseHandlers: (p) =>
+        {
+            for (const f of fs.readdirSync(p, {withFileTypes: true}))
+            {
+                if (f.isFile())
+                {
+                    //load command
+                    const handlerPath = path.join(p, f.name);
+                    const ExpressHandle = require(handlerPath);
+                    const cmd = new ExpressHandle(app.express, log);
+                    cmd.fullPath = handlerPath;
+                    cmd.install();
+                }
+            }
+        },
+
         loadRouteHandlers: () =>
         {
             return new Promise((resolve, reject) =>
             {
-                if (!fs.existsSync('./config/routes.json'))
-                {
-                    return reject({message: 'routes.json not found in /config'});
-                }
-
                 const path_routes = path.join(__dirname, '/routes/');
 
                 if (!fs.existsSync(path_routes))
@@ -102,37 +113,7 @@ const app = {
                     fs.mkdir(path_routes);
                 }
 
-                const config_routes = require(path.join(__dirname, '/config/routes'));
-
-                config_routes.routes.map(item =>
-                {
-
-                    if (item.method === undefined)
-                    {
-                        item.method = 'get';
-                    }
-
-                    if (item.handler === undefined)
-                    {
-                        log.error(`Handler is not defined for ${item.path} (${item.method })`);
-                    }
-                    else
-                    {
-                        const jsFile = path_routes + item.handler;
-
-                        if (fs.existsSync(jsFile + '.js'))
-                        {
-                            log.info(`loading handler for ${item.path} ${item.method !== undefined ? '(' + item.method.toUpperCase() + ')' : ''}`);
-
-                            app.express[item.method](item.path, require(jsFile)[item.method.toLowerCase()]);
-                            //app.express.route(item.path)[item.method](require(jsFile)[item.method]);
-                        }
-                        else
-                        {
-                            log.error(`Handler (${item.handler}) not loaded for ${item.path} ${item.method !== undefined ? '(' + item.method.toUpperCase() + ')' : ''}`);
-                        }
-                    }
-                });
+                app.utils.parseHandlers(path_routes);
 
                 return resolve(true);
             });
@@ -339,7 +320,7 @@ const app = {
         //Mount SiteAdmin CMS support
         if (app.config.cms.enabled)
         {
-            const SiteAdminCMS = require('./siteadmincms');
+            const SiteAdminCMS = require(path.join(__dirname, 'siteadmincms'));
             const cms = new SiteAdminCMS(app.express, app.config.cms.mountPath);
         }
 
@@ -370,8 +351,14 @@ const app = {
     }
 };
 
-global.app = app;
-
+//global.app = app;
 app.init();
+/*app.utils.loadRouteHandlers().then(() =>
+{
+    console.log('loaded');
+}).catch(err =>
+{
+    console.log(err);
+});*/
 
 //https://stackoverflow.com/questions/16784129/dynamically-load-routes-with-express-js
