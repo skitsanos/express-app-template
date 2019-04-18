@@ -351,7 +351,6 @@ const app = {
     }
 };
 
-//global.app = app;
 app.init();
 /*app.utils.loadRouteHandlers().then(() =>
 {
@@ -360,5 +359,3 @@ app.init();
 {
     console.log(err);
 });*/
-
-//https://stackoverflow.com/questions/16784129/dynamically-load-routes-with-express-js

@@ -27,15 +27,35 @@ class ExpressjsRouteHandler
         }
         else
         {
-            if (typeof this[this.method.toLowerCase()] === 'function')
+            if (Array.isArray(this.method) === false)
             {
-                this.express[this.method.toLowerCase()](this.path, this[this.method.toLowerCase()]);
+                if (typeof this[this.method.toLowerCase()] === 'function')
+                {
+                    this.express[this.method.toLowerCase()](this.path, this[this.method.toLowerCase()]);
+                }
+                else
+                {
+                    this.log.warn('Skipping. Couldn\'t find any handlers');
+                    return;
+                }
             }
             else
             {
-                this.log.warn('Skipping. Couldn\'t find any handlers');
-                return;
+                //loop through all the methods
+                for (const m of this.method)
+                {
+                    if (typeof this[m.toLowerCase()] === 'function')
+                    {
+                        this.express[m.toLowerCase()](this.path, this[m.toLowerCase()]);
+                    }
+                    else
+                    {
+                        this.log.warn(`Skipping. Couldn\'t find any handler for ${m.toUpperCase()} method at ${this.fullPath}`);
+                        return;
+                    }
+                }
             }
+
         }
 
         this.log.info(`Installed handler for ${this.path} with ${_method} method...`);

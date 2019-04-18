@@ -7,10 +7,11 @@ class handler extends RequestHandler
     {
         super(express_instance, log);
         this.path = '/upload';
+        this.method = ['get', 'post', 'head'];
         this.description = 'Upload handler';
     }
 
-    get(req, res)
+    get(req, res, next)
     {
         const manifest = require(path.join(process.cwd(), +'/package'));
 
@@ -32,7 +33,7 @@ class handler extends RequestHandler
         res.send(JSON.stringify(doc));
     }
 
-    post(req, res)
+    post(req, res, next)
     {
         const log = req.app.settings.log;
 
