@@ -351,11 +351,6 @@ const app = {
     }
 };
 
+global.app = app;
+
 app.init();
-/*app.utils.loadRouteHandlers().then(() =>
-{
-    console.log('loaded');
-}).catch(err =>
-{
-    console.log(err);
-});*/

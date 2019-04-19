@@ -5,7 +5,7 @@ Template for creating ExpressJs applications with very minimum coding required. 
 
 In order to use it, just clone the repo from GitHub and run _npm install_ inside the directory you've just got.
 
-```
+```sh
 git clone https://github.com/skitsanos/express-app-template.git
 
 cd express-app-template
@@ -93,70 +93,67 @@ Reserved for SiteAdmin CMS module.
 - _viewEngine_ - Expressjs view engine, by default is hbs, but you free to use whatever else you like.
 
 
-#### Routes configuration (/config/routes.json)
+#### Routes configuration 
 
-Routes configuration is defined in _routes.json file in JSON format, like this:
+Writing middleware/route handlers became even more easier thann it was in earlier versions.
 
-```json
-{
-  "routes": [
-    {
-      "path": "/",
-      "handler": "index"
-    },
-    {
-      "path": [
-        "/echo",
-        "/talkback"
-      ],
-      "handler": "echo",
-      "method": "all"
-    },
-    {
-      "path": "/echo/:id",
-      "handler": "echo"
-    },
-    {
-      "path": "/upload",
-      "handler": "upload",
-      "method": "post"
-    }
-  ]
-}
-```
-
-_routes_ element of your JSON file contains array of _route_ objects that have the following properties:
-
-- _path_ - application path that will be handled by route handler, can be a string or array of strings
-- _handler_ - node.js module (see below for an exmaple) that will be handling request to your route
-- _method_ - HTTP method to be used on this hanlder (get, post, put, etc...), or _all_ to accept all HTTP methods. This parameter is optional and if not specified, GET method will be assumed.
-
-**Route handler example**
+The following handler is executed for requests to _/secret_ whether using GET, POST, PUT, DELETE, or any other HTTP request method.
 
 ```js
-const RequestHandler = require('./_request_handler');
+const path = require('path');
+const RequestHandler = require(path.join(process.cwd(), 'njsf/express/route'));
 
 class handler extends RequestHandler
 {
-    constructor()
+    constructor(express_instance, log)
     {
-        super();
+        super(express_instance, log);
+        this.path = '/secret';
+        this.description = 'Some secret route';
     }
 
-    get(req, res, next)
+    all(req, res, next)
     {
-        super.all(req, res, next).then(result =>
-        {
-            global.app.utils.render(req, res, 'index');
-        }).catch(err =>
-        {
-            res.send({error: {message: 'Failed to process request', reason: err, url: req.url}});
-        });
+        global.app.utils.render(req, res, 'secret');
     }
 }
 
-module.exports = new handler();
+module.exports = handler;
 ```
+
+**route path**
+
+When you creating a path handler, you need to specify at least _this.path_. The path for which the middleware function is invoked; can be any of:
+
+- A string representing a path.
+- A path pattern.
+- A regular expression pattern to match paths.
+- An array of combinations of any of the above.
+
+**route method**
+
+_this.method_ property, that can be a string or string array, will tell handler to accept incoming requests for the the methods you specify.
+
+```js
+class handler extends RequestHandler
+{
+    constructor(express_instance, log)
+    {
+        super(express_instance, log);
+        this.path = '/secret';
+        this.method = ['GET', 'POST'];
+        this.description = 'Some secret route';
+    }
+
+    put(req, res, next)
+    {
+        global.app.utils.render(req, res, 'secret');
+    }
+}
+
+```
+
+In the example above, you telling your handler to accept connections via GET and POST methods, although you don't have any functionality for these, as result handler loader will reject it.
 
 #### Access rules configuration (/config/access.json)
 
