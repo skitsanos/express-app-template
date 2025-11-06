@@ -1,23 +1,27 @@
 {
   "name": "express-server-template",
+  "version": "5.0.0",
   "description": "Template for creating web sites and REST applications in Node.js",
-  "version": "2.0.1",
   "author": {
     "name": "Skitsanos",
     "url": "https://github.com/skitsanos"
   },
   "license": "MIT",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
   "dependencies": {
-    "body-parser": "latest",
-    "commander": "^14.0.0",
-    "cookie-parser": "^1.4.4",
-    "express": "^5.0.0",
-    "express-resource": "^1.0.0",
-    "express-session": "^1.15.6",
-    "formidable": "^3.2.4",
-    "hbs": "^4.0.4",
-    "moment": "^2.24.0",
-    "winston": "^3.1.0",
-    "winston-transport": "latest"
+    "commander": "^14.0.2",
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "formidable": "^3.5.4",
+    "hbs": "^4.2.0",
+    "helmet": "^8.1.0",
+    "http-errors": "^2.0.0",
+    "morgan": "^1.10.1",
+    "winston": "^3.18.3"
   }
 }

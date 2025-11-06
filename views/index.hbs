@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{pkg.name}} • Express 5 Template</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(circle at top, #1f2933, #0b1018);
+            color: #f9fafb;
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+
+        main {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            padding: 3rem clamp(2rem, 4vw, 4rem);
+            max-width: 640px;
+            width: min(100%, 640px);
+            box-shadow: 0 32px 68px rgba(15, 23, 42, 0.35);
+        }
+
+        h1 {
+            font-size: clamp(2rem, 5vw, 3rem);
+            margin-bottom: 1rem;
+        }
+
+        p {
+            color: rgba(226, 232, 240, 0.85);
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin: 0.5rem 0 1.5rem;
+        }
+
+        .meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: rgba(148, 163, 184, 0.9);
+        }
+
+        footer {
+            margin-top: 2.5rem;
+            font-size: 0.9rem;
+            color: rgba(148, 163, 184, 0.7);
+        }
+
+        @media (max-width: 600px) {
+            main {
+                padding: 2.25rem 1.5rem;
+            }
+
+            .meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h1>{{pkg.name}}</h1>
+    <p>{{pkg.description}}</p>
+    <p>This Express 5 bootstrap is ready for your routes, middleware, and views. Edit <code>routes/</code> to get started.</p>
+
+    <div class="meta">
+        <span>Version {{pkg.version}}</span>
+        <span>Node {{runtime.node}}</span>
+    </div>
+
+    {{> footer}}
+</main>
+</body>
+</html>

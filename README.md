@@ -1,190 +1,98 @@
 # express-app-template
-Template for creating ExpressJs applications with very minimum coding required. Just write your own route handlers, the rest is done for you already
+Fresh, fast, and production-minded: an Express 5 starter that keeps the boilerplate out of your way while wiring in modern middleware, structured configuration, sessions, and file uploads.
 
-### Installing
+## Highlights
+- Express 5 + Helmet 8, compression, and morgan baked in.
+- JSON-driven config (`config/app.json`) for parsers, view engines, sessions, and uploads.
+- Auto-discovered route modules—drop a file into `routes/` and it mounts itself.
+- Session-ready demo login/logout flow with optional ephemeral secret generation.
+- Formidable-powered multipart uploads and Handlebars view support out of the box.
 
-In order to use it, just clone the repo from GitHub and run _npm install_ inside the directory you've just got.
-
+## Quick start
 ```sh
 git clone https://github.com/skitsanos/express-app-template.git
-
 cd express-app-template
 
+# install dependencies (npm, pnpm, or bun all work)
 npm install
+
+# run the server on http://localhost:3000
+npm start
 ```
 
-If you want to run your web app as shell script you can add to it execute rights:
-
+Want the entry point to behave like a CLI? Make it executable:
 ```sh
 chmod u+x app.js
 ```
 
+## Configuration at a glance
+All runtime knobs live in `config/app.json`. The defaults ship with sensible security presets and enable forms, cookies, JSON parsers, and sessions.
 
-### Configuration
+- `errors`: toggle logging, stack traces, and response format (`html` or `json`).
+- `bodyLimit`: express-style size string for JSON/urlencoded payloads.
+- `parsers`: enable/disable JSON, urlencoded, multipart (Formidable), and cookies.
+- `uploads`: destination path and max file size for multipart uploads.
+- `session`: turn sessions on, provide a `secret`, and shape the cookie. If no secret is set, the app generates a random one for the process (great for demos—set `SESSION_SECRET` in production).
+- `viewEngine` / `viewExtension`: plug any engine supported by Express; Handlebars (`hbs`) is preconfigured.
+- `cms`: reserved hook for a future SiteAdmin CMS mount.
+- `strictRouting`: match `/foo` and `/foo/` separately when you need to.
 
-Application configuration is pretty straight forward, there are just 3 things to set:
+`config/access.json` controls which routes skip authentication. Entries can be literal paths or `{ "rule": "<regex>" }` objects—anything missing falls back to the session gate defined in `app.js`.
 
-- Application itself,
-- Routes, and
-- Access rules
-
-#### Application configuration (/config/app.json)
-
-There is number of things can be configured for your applications, from various parsers to how error handling is done. You can leave default configuration like this: 
-
-```json
-{
-  "errors": {
-    "logHttpErrors": true,
-    "reportErrorsAs": "html",
-    "showStack": true
-  },
-  "parsers": {
-    "json": true,
-    "urlEncoded": true,
-    "forms": true,
-    "cookies": true
-  },
-  "uploads": {
-    "storage": "/uploads/",
-    "limit": 10485760
-  },
-  "cms": {
-    "enabled": true,
-    "mountPath": "/cms"
-  },
-  "strictRouting": false,
-  "viewEngine": "hbs"
-}
-```
-
-**_errors_ section configutration**
-
-- _reportErrorsAs_ - Specifies on how to report site errors back to the client side, possible formats are _json_ or _html_.
-- _showStack_ - if enabled, will also printout into log site error stack data which is handy for debug purpose, keep it disabled (_false_) in production.
- - _ logHttpErrors_ - logs errors like 'Page not found', keep it disabled (_false_) in production.
-
-**_parsers_ section configutration**
- 
-This section defines how your site requests are going to be parsed.
- 
-- _json_ - Enables JSON body parser
-- _urlEncoded_ - Enables URLEncoded body parser
-- _forms_ - Enables Forms parser (via [Formidable](https://github.com/felixge/node-formidable))
-- _cookies_ - Enables Cookies parser
-
-**_uploads_ section configutration**
-
-Processing file uploading via [Formidable](https://github.com/felixge/node-formidable)
-
-- _storage_ - location where uploaded files will be stored. Available in route handler as _req.app.settings.uploadDir_
-- _limit_ - file uploading limit in bytes. Available in route handler as _req.app.settings.uploadMaxFileSize_
-
-**_cms_ section configutration**
-
-Reserved for SiteAdmin CMS module.
-
-- _enabled_ - reserved for mounting SiteAdminCMS module
-- _mountPath_ - url path where CMS is being mounted
-
-**other bits configutration**
-
-- _strictRouting_ - Disabled by default, “/foo” and “/foo/” are treated the same by the router.
-- _viewEngine_ - Expressjs view engine, by default is hbs, but you free to use whatever else you like.
-
-
-#### Routes configuration 
-
-Writing middleware/route handlers became even more easier thann it was in earlier versions.
-
-The following handler is executed for requests to _/secret_ whether using GET, POST, PUT, DELETE, or any other HTTP request method.
+## Routing model
+Routes are plain factories that receive `{app, logger, config, pkg}` and mount their own `Router` instances. Async handlers work without wrappers on Express 5.
 
 ```js
-const path = require('path');
-const RequestHandler = require(path.join(process.cwd(), 'njsf/express/route'));
+const {Router} = require('express');
 
-class handler extends RequestHandler
+module.exports = ({app}) =>
 {
-    constructor(express_instance, log)
-    {
-        super(express_instance, log);
-        this.path = '/secret';
-        this.description = 'Some secret route';
-    }
+    const router = Router();
 
-    all(req, res, next)
-    {
-        global.app.utils.render(req, res, 'secret');
-    }
-}
+    router
+        .route('/secret')
+        .get(async (_req, res) => res.render('secret'))
+        .post(async (req, res) => res.json({message: 'Secret updated'}));
 
-module.exports = handler;
+    app.use(router);
+};
 ```
 
-**route path**
+Add as many modules as you like—every `.js` file in `routes/` is loaded at boot. Need ES module compatibility? Export a default function; the loader understands both styles.
 
-When you creating a path handler, you need to specify at least _this.path_. The path for which the middleware function is invoked; can be any of:
+## Out-of-the-box routes
+- `GET /` – Handlebars landing page with project metadata, ready to rebrand.
+- `GET /echo` – Reflects headers, params, and body for quick testing.
+- `POST /login` – Marks the session as authenticated (`{"username":"demo"}` is enough).
+- `POST /logout` – Destroys the session and clears the cookie.
+- `POST /upload` – Multipart uploads via Formidable; requires an authenticated session.
 
-- A string representing a path.
-- A path pattern.
-- A regular expression pattern to match paths.
-- An array of combinations of any of the above.
+### Demo flow
+```sh
+# 1. authenticate and store the cookie
+curl -c cookie.txt -H "Content-Type: application/json" \
+  -d '{"username":"demo"}' http://localhost:3000/login
 
-**route method**
+# 2. upload a file with the same session
+curl -b cookie.txt -F file=@app.js http://localhost:3000/upload
 
-_this.method_ property, that can be a string or string array, will tell handler to accept incoming requests for the the methods you specify.
-
-```js
-class handler extends RequestHandler
-{
-    constructor(express_instance, log)
-    {
-        super(express_instance, log);
-        this.path = '/secret';
-        this.method = ['GET', 'POST'];
-        this.description = 'Some secret route';
-    }
-
-    put(req, res, next)
-    {
-        global.app.utils.render(req, res, 'secret');
-    }
-}
-
+# 3. log out when you’re done
+curl -b cookie.txt -X POST http://localhost:3000/logout
 ```
 
-In the example above, you telling your handler to accept connections via GET and POST methods, although you don't have any functionality for these, as result handler loader will reject it.
-
-#### Access rules configuration (/config/access.json)
-
-This configuration file defines access rules for your routes and it might look like this:
-
-```json
-{
-  "public": [
-    "/",
-    "/login",
-    "/echo",
-    "/privacy-policy",
-    "/terms",
-    "/public/message",
-    "/public/plufinder/browse",
-    {
-      "rule": "\/public\/plu\/([^\/]+)"
-    },
-    {
-      "rule": "\/public\/plufinder\/plu\/([^\/]+)"
-    },
-    {
-      "rule": "\/public\/plufinder\/varieties\/([^\/]+)"
-    },
-    {
-      "rule": "\/public\/ppi\/([^\/]+)"
-    }
-  ]
-}
+## Project layout
+```
+app.js               # Bootstrap: config, middleware, route discovery, server start
+config/              # JSON configuration (app + access rules)
+routes/              # Auto-loaded route modules (index, echo, upload, login, …)
+views/               # Handlebars templates and partials (optional)
+uploads/             # Runtime upload directory (auto-created)
 ```
 
-Basically, anything that defined within _public_ array node will be served without authentication, otherwise user will receive redirect to _/login_ route.
+## Next steps
+- Swap in your own view engine or API-only responses.
+- Replace the demo login with real authentication logic.
+- Extend `config/access.json` as your auth surface grows.
+- Deploy with a persistent `SESSION_SECRET` and external session store (Redis, DB, …) for horizontal scale.
 
-This array item can be a string or an object that has _rule_ property in it that represents regex rule.
+Built with ♥ by [Skitsanos](https://github.com/skitsanos). Licensed under MIT—fork, remix, and ship something great.

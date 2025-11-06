@@ -4,6 +4,7 @@
     "reportErrorsAs": "html",
     "showStack": true
   },
+  "bodyLimit": "1mb",
   "parsers": {
     "json": true,
     "urlEncoded": true,
@@ -18,6 +19,19 @@
     "enabled": false,
     "mountPath": "/cms"
   },
+  "session": {
+    "enabled": true,
+    "secret": "",
+    "resave": false,
+    "saveUninitialized": false,
+    "cookie": {
+      "httpOnly": true,
+      "sameSite": "lax",
+      "secure": false,
+      "maxAge": null
+    }
+  },
   "strictRouting": false,
-  "viewEngine": "hbs"
+  "viewEngine": "hbs",
+  "viewExtension": "hbs"
 }

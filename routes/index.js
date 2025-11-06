@@ -1,19 +1,25 @@
-const path = require('path');
-const RequestHandler = require(path.join(process.cwd(), 'njsf/express/route'));
+const {Router} = require('express');
 
-class handler extends RequestHandler
+module.exports = ({app}) =>
 {
-    constructor(express_instance, log)
-    {
-        super(express_instance, log);
-        this.path = '/';
-        this.description = 'Site index page';
-    }
+    const router = Router();
 
-    get(req, res, next)
+    router.get('/', (req, res) =>
     {
-        global.app.utils.render(req, res, 'index');
-    }
-}
+        if (typeof res.render === 'function')
+        {
+            return res.render('index');
+        }
 
-module.exports = handler;
+        const meta = app.locals.pkg || {};
+        return res.json({
+            meta: {
+                name: meta.name,
+                description: meta.description,
+                version: meta.version
+            }
+        });
+    });
+
+    app.use(router);
+};

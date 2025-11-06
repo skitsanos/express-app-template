@@ -1,88 +1,60 @@
-const path = require('path');
-const RequestHandler = require(path.join(process.cwd(), 'njsf/express/route'));
+const {Router} = require('express');
+const formidable = require('formidable');
+const createHttpError = require('http-errors');
 
-class handler extends RequestHandler
+module.exports = ({app, logger}) =>
 {
-    constructor(express_instance, log)
-    {
-        super(express_instance, log);
-        this.path = '/upload';
-        this.method = ['get', 'post', 'head'];
-        this.description = 'Upload handler';
-    }
+    const router = Router();
 
-    get(req, res, next)
-    {
-        const manifest = require(path.join(process.cwd(), +'/package'));
+    router.head('/upload', (_req, res) => res.sendStatus(204));
 
-        const doc = {
+    router.get('/upload', (req, res) =>
+    {
+        const meta = app.locals.pkg || {};
+
+        res.json({
             meta: {
-                name: manifest.name,
-                description: manifest.description,
-                version: manifest.version
+                name: meta.name,
+                description: meta.description,
+                version: meta.version
             },
-            request: req.headers,
-            query: req.query,
-            params: req.params,
-            form: req.form,
-            files: req.files,
-            body: req.body
-        };
+            uploads: app.locals.uploadSettings || {}
+        });
+    });
 
-        res.contentType('application/json');
-        res.send(JSON.stringify(doc));
-    }
-
-    post(req, res, next)
+    router.post('/upload', (req, res, next) =>
     {
-        const log = req.app.settings.log;
+        const uploadSettings = app.locals.uploadSettings || {};
+        const createFormidable = req.app.locals.formidable
+            || (typeof formidable === 'function' ? formidable : formidable.formidable);
 
-        const form = new req.app.formidable.IncomingForm();
-        form.uploadDir = req.app.settings.uploadDir;
-        form.maxFileSize = req.app.settings.uploadMaxFileSize;
-        form.keepExtensions = true;
-
-        form.on('fileBegin', (name, file) =>
+        if (typeof createFormidable !== 'function')
         {
-            //rename the incoming file to the file's name
-            file.path = form.uploadDir + '/' + file.name;
-        });
+            logger.error('Formidable factory is not available. Ensure parsers.forms is enabled.');
+            return next(createHttpError(500, 'File uploads are not configured.'));
+        }
 
-        form.on('error', (err) =>
-        {
-            const e = new Error(err.message);
-            e.status = 500;
-            res.send({error: {message: err.message}});
-        });
-
-        form.on('aborted', function ()
-        {
-            log.error('user aborted request to ' + req.url);
+        const form = createFormidable({
+            uploadDir: uploadSettings.dir,
+            maxFileSize: uploadSettings.maxFileSize,
+            keepExtensions: true,
+            multiples: true
         });
 
         form.parse(req, (err, fields, files) =>
         {
             if (err)
             {
-                const e = new Error(err.message);
-                e.status = 400;
-                if (!req.aborted)
-                {
-                    res.send({error: {message: err.message}});
-                }
+                logger.warn(`File upload failed: ${err.message}`);
+                return next(createHttpError(400, err.message));
             }
-            else
-            {
-                req.form = fields;
-                req.files = files;
 
-                if (!req.aborted)
-                {
-                    res.send('ok');
-                }
-            }
+            res.json({
+                fields,
+                files
+            });
         });
-    }
-}
+    });
 
-module.exports = handler;
+    app.use(router);
+};

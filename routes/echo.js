@@ -1,33 +1,28 @@
-const path = require('path');
-const RequestHandler = require(path.join(process.cwd(), 'njsf/express/route'));
+const {Router} = require('express');
 
-class handler extends RequestHandler
+module.exports = ({app}) =>
 {
-    constructor(express_instance, log)
-    {
-        super(express_instance, log);
-        this.path = ['/echo', '/talkback'];
-    }
+    const router = Router();
 
-    all(req, res, next)
+    router.all(['/echo', '/talkback'], (req, res) =>
     {
-        const manifest = require(path.join(global.app.appRoot, '/package'));
+        const meta = app.locals.pkg || {};
 
-        const doc = {
+        res.json({
             meta: {
-                name: manifest.name,
-                description: manifest.description,
-                version: manifest.version
+                name: meta.name,
+                description: meta.description,
+                version: meta.version
             },
-            request: req.headers,
-            query: req.query,
-            params: req.params,
-            file: req.file
-            //body: req.body
-        };
+            request: {
+                headers: req.headers,
+                query: req.query,
+                params: req.params,
+                body: Object.keys(req.body || {}).length ? req.body : undefined,
+                ip: req.ip
+            }
+        });
+    });
 
-        res.json(doc);
-    }
-}
-
-module.exports = handler;
+    app.use(router);
+};
